@@ -34,10 +34,9 @@ class TestRobot():
 
 
 class World(object):
-    def __init__(self, world):
-        self.world = world
-        self.width = len(world[0])
-        self.height = len(world)
+    def __init__(self, map):
+        self.map = map
+        self.height,self.width=map.shape
         turtle.setworldcoordinates(0, 0, self.width, self.height)
         self.blocks = []
         self.unknown = []
@@ -46,7 +45,7 @@ class World(object):
         self.update_cnt = 0
         self.one_px = float(turtle.window_width()) / float(self.width) / 2
 
-        for y, line in enumerate(self.world):
+        for y, line in enumerate(self.map):
             for x, block in enumerate(line):
                 nb_y = self.height - y - 1
                 self.blocks.append((x, nb_y))
@@ -421,19 +420,19 @@ if __name__ == '__main__':
     # world.show_robots(robotList)
     world2 = World(r1.getLocalMap())
     world2.draw()
-    r1.sense(worldData)
-    r2.sense(worldData)
-    r3.sense(worldData)
+    r1.sense(world)
+    r2.sense(world)
+    r3.sense(world)
     world2.drawSenses(robotList)
     world2.show_robots(robotList)
     for i in range(10000):
         print(i)
-        r1.move(worldData)
-        r1.sense(worldData)
-        r2.move(worldData)
-        r2.sense(worldData)
-        r3.move(worldData)
-        r3.sense(worldData)
+        r1.move(world)
+        r1.sense(world)
+        r2.move(world)
+        r2.sense(world)
+        r3.move(world)
+        r3.sense(world)
         world2.drawSenses(robotList)
         world2.show_robots(robotList)
         turtle.delay(50)

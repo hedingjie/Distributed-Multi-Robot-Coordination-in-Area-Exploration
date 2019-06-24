@@ -53,7 +53,8 @@ class Robot(object):
 
     def sense(self,world):
         # 计算大致的感知区域
-        rowNum,colNum=world.shape
+        wMap=world.map
+        rowNum,colNum=wMap.shape
         xMin=(self._x-self._rs) if (self._x-self._rs >= 0) else (0)
         xMax=(self._x+self._rs) if (self._x+self._rs < colNum) else colNum
 
@@ -62,9 +63,9 @@ class Robot(object):
 
 
         # -1表示未探索，0表示以探索为free,1表示已探索被占用
-        for i in range(xMin,xMax,1):
-            for j in range(yMin,yMax,1):
-                self.localMap[j][i]=world[j][i]
+        for i in range(xMin,xMax+1,1):
+            for j in range(yMin,yMax+1,1):
+                self.localMap[j][i]=wMap[j][i]
                 # if utils.length(self._x,self._y,i,j) <= self._rs :
                 #     self.localMap[j][i]=world[j][i]
                 # else:
@@ -72,34 +73,35 @@ class Robot(object):
 
     def move(self,world):
         # 测试移动功能，此处为随机游走
-        height,width=world.shape
+        wMap=world.map
+        height,width=wMap.shape
         while True:
             num=int(random.random()*4)
             print(self,'num:',num)
             x,y = self.xy()
             if num == 0:
-                if(x < width-1 and world[y][x+1]!=1 ):
+                if(x < width-1 and wMap[y][x+1]!=1 ):
                     self._x=self._x+1
                     # self._y=self._y+1
                     break
                 else:
                     continue
             elif num==1:
-                if (x>0 and world[y][x-1]!=1):
+                if (x>0 and wMap[y][x-1]!=1):
                     self._x=self._x-1
                     # self._y=self._y-1
                     break
                 else:
                     continue
             elif num==2:
-                if (y<height-1 and world[y+1][x]!=1):
+                if (y<height-1 and wMap[y+1][x]!=1):
                     # self._x=self._x-1
                     self._y=self._y+1
                     break
                 else:
                     continue
             else:
-                if (y > 0 and world[y-1][x]!=1):
+                if (y > 0 and wMap[y-1][x]!=1):
                     # self._x=self._x+1
                     self._y=self._y-1
                     break
