@@ -4,6 +4,8 @@ import math
 import turtle
 import numpy as np
 from Robot import *
+from Navigation import *
+import AStar
 
 
 turtle.tracer(50000, delay=0)
@@ -44,23 +46,30 @@ class World(object):
         self.obstacle = []
         self.update_cnt = 0
         self.one_px = float(turtle.window_width()) / float(self.width) / 2
+        self.robot_list=[]
 
         for y, line in enumerate(self.map):
             for x, block in enumerate(line):
-                nb_y = self.height - y - 1
-                self.blocks.append((x, nb_y))
+                # nb_y = self.height - y - 1
+                self.blocks.append((x, y))
                 if block == -1:  # 未知区域
-                    nb_y = self.height - y - 1
-                    self.unknown.append((x, nb_y))
+                    # nb_y = self.height - y - 1
+                    self.unknown.append((x, y))
                 elif block == 0: # free区域
-                    nb_y = self.height - y - 1
-                    self.free.append((x, nb_y))
+                    # nb_y = self.height - y - 1
+                    self.free.append((x, y))
                 elif block == 1: # 障碍区域
-                    nb_y = self.height - y - 1
-                    self.obstacle.append((x, nb_y))
+                    # nb_y = self.height - y - 1
+                    self.obstacle.append((x, y))
                 else:
-                    print(x,y)
+                    print('Exception at (' + x +',' +y + ')')
                     raise Exception
+
+    def addRobot(self,robot):
+        self.robot_list.append(robot)
+
+    def getRobotList(self):
+        return self.robot_list
 
     def draw(self):
         for x,y in self.obstacle:
@@ -203,10 +212,10 @@ class World(object):
         x,y=robot.xy()
         rs=robot.getRS()
         xMin = (x - rs) if (x - rs >= 0) else (0)
-        xMax = (x + rs) if (x + rs < colNum-1) else colNum
+        xMax = (x + rs) if (x + rs < colNum-rs) else colNum-1
 
         yMin = (y - rs) if (y - rs >= 0) else (0)
-        yMax = (y + rs) if (y + rs < rowNum-1) else rowNum
+        yMax = (y + rs) if (y + rs < rowNum-rs) else rowNum-1
 
         # -1表示未探索，0表示以探索为free,1表示已探索被占用
         for i in range(xMin, xMax+1, 1):
@@ -218,76 +227,9 @@ class World(object):
                         self.draw_one_black(i,j,'black')
                     else:
                         pass
-                except Exception:
-                    print('X:', xMax, ',', xMin)
-                    print('Y:', yMax, ',', yMin)
-        # turtle.update()
-
-        # x,y=robot.xy()
-        # if(x-1>0 and y-1 >0):
-        #     if map[x-1][y-1]==0:
-        #         self.draw_one_black(x-1,y-1,'white')
-        #     elif map[x-1][y-1]==1:
-        #         self.draw_one_black(x-1,y-1,'black')
-        #     else:
-        #         pass
-        # if (x > 0 and y - 1 > 0):
-        #     if map[x][y - 1] == 0:
-        #         self.draw_one_black(x,y-1,'white')
-        #     elif map[x][y - 1] == 1:
-        #         self.draw_one_black(x,y-1,'black')
-        #     else:
-        #         pass
-        # if (x +1 < colNum and y - 1 > 0):
-        #     if map[x + 1][y - 1] == 0:
-        #         self.draw_one_black(x+1,y-1,'white')
-        #     elif map[x + 1][y - 1] == 1:
-        #         self.draw_one_black(x+1,y-1,'black')
-        #     else:
-        #         pass
-        # if (x - 1 > 0 and y > 0):
-        #     if map[x - 1][y] == 0:
-        #         self.draw_one_black(x-1,y,'white')
-        #     elif map[x - 1][y] == 1:
-        #         self.draw_one_black(x-1,y,'black')
-        #     else:
-        #         pass
-        # if (x > 0 and y > 0):
-        #     if map[x][y] == 0:
-        #         self.draw_one_black(x,y,'white')
-        #     elif map[x][y] == 1:
-        #         self.draw_one_black(x,y,'black')
-        #     else:
-        #         pass
-        # if (x+1 < colNum and y > 0):
-        #     if map[x+1][y] == 0:
-        #         self.draw_one_black(x+1,y,'white')
-        #     elif map[x+1][y] == 1:
-        #         self.draw_one_black(x+1,y,'black')
-        #     else:
-        #         pass
-        # if (x-1 > 0 and y + 1 <rowNum):
-        #     if map[x - 1][y + 1] == 0:
-        #         self.draw_one_black(x-1,y+1,'white')
-        #     elif map[x - 1][y + 1] == 1:
-        #         self.draw_one_black(x-1,y+1,'black')
-        #     else:
-        #         pass
-        # if (x > 0 and y + 1 < rowNum):
-        #     if map[x][y + 1] == 0:
-        #         self.draw_one_black(x,y+1,'white')
-        #     elif map[x][y + 1] == 1:
-        #         self.draw_one_black(x,y+1,'black')
-        #     else:
-        #         pass
-        # if (x + 1 < colNum and y + 1 <rowNum):
-        #     if map[x + 1][y + 1] == 0:
-        #         self.draw_one_black(x+1,y+1,'white')
-        #     elif map[x + 1][y + 1] == 1:
-        #         self.draw_one_black(x+1,y+1,'black')
-        #     else:
-        #         pass
-
+                except Exception as err:
+                    print('Exception at drawSense')
+                    raise err
 
     def drawSenses(self,robotList):
         for robot in robotList:
@@ -409,32 +351,110 @@ if __name__ == '__main__':
 
     world = World(worldData)
     # world.draw()
+    r0=Robot(world,0,1,1)
+    r1=Robot(world,1,25,25)
+    r2=Robot(world,2,16,16)
+    r3=Robot(world,3,1,25)
 
-    r1=Robot(1,1)
-    r2=Robot(1,5)
-    r3=Robot(25,25)
-    robotList=[]
-    robotList.append(r1)
-    robotList.append(r2)
-    robotList.append(r3)
-    # world.show_robots(robotList)
-    world2 = World(r1.getLocalMap())
-    world2.draw()
-    r1.sense(world)
-    r2.sense(world)
-    r3.sense(world)
-    world2.drawSenses(robotList)
-    world2.show_robots(robotList)
-    for i in range(10000):
-        print(i)
-        r1.move(world)
-        r1.sense(world)
-        r2.move(world)
-        r2.sense(world)
-        r3.move(world)
-        r3.sense(world)
-        world2.drawSenses(robotList)
-        world2.show_robots(robotList)
-        turtle.delay(50)
+    utils.drawWorld(world)
 
-    turtle.mainloop()
+    r0.sense()
+    r1.sense()
+    r2.sense()
+    r3.sense()
+    utils.drawMap(r1.getLocalMap())
+    utils.drawRobots(r1.getLocalMap(),world.getRobotList())
+    for i in range(1500):
+        print('***********STEP',i,'***********')
+        x1, y1 = r0.xy()
+        dest1 = r0.chooseDest()
+        cmds1 = AStar.navigate(worldData, x1, y1, dest1[0], dest1[1])
+        for cmd in cmds1:
+            r0.move(cmd)
+            r0.sense()
+            r0.updateKnownRobots()
+            utils.communicate(world)
+
+        x2,y2=r1.xy()
+        dest2=r1.chooseDest()
+        cmds2=AStar.navigate(worldData,x2,y2,dest2[0],dest2[1])
+
+            # utils.drawSense(r0.getLocalMap(), r0)
+            # utils.drawRobots(r0.getLocalMap(), world.getRobotList())
+        for cmd in cmds2:
+            r1.move(cmd)
+            r1.sense()
+            r1.updateKnownRobots()
+            utils.communicate(world)
+            # utils.drawRobots(r1.getLocalMap(), world.getRobotList())
+            utils.drawSense(r1.getLocalMap(),r1)
+            # utils.drawSense(r1.getLocalMap(), r1)
+            # utils.drawRobots(r1.getLocalMap(), world.getRobotList())
+
+        x3, y3 = r2.xy()
+        dest3 = r2.chooseDest()
+        cmds3 = AStar.navigate(worldData, x3, y3, dest3[0], dest3[1])
+        for cmd in cmds1:
+            r2.move(cmd)
+            r2.sense()
+            r2.updateKnownRobots()
+            utils.communicate(world)
+
+        x4, y4 = r3.xy()
+        dest4 = r3.chooseDest()
+        cmds4 = AStar.navigate(worldData, x4, y4, dest4[0], dest4[1])
+        for cmd in cmds1:
+            r3.move(cmd)
+            r3.sense()
+            r3.updateKnownRobots()
+            utils.communicate(world)
+
+        if(utils.Unexploration(r1.getLocalMap())==0):
+            print('Iteration : ',i)
+            break
+
+        # utils.drawMap(r0.getLocalMap())
+
+
+
+        # local_world.drawSenses(world.getRobotList())
+        # local_world.show_robots(world.getRobotList())
+
+    print('Done')
+
+    # r1=Robot(1,1)
+    # r2=Robot(1,5)
+    # r3=Robot(25,25)
+    # robotList=[]
+    # robotList.append(r1)
+    # robotList.append(r2)
+    # robotList.append(r3)
+    # # world.show_robots(robotList)
+    # world2 = World(r1.getLocalMap())
+    # world2.draw()
+    # r1.sense(world)
+    # r2.sense(world)
+    # r3.sense(world)
+    # world2.drawSenses(robotList)
+    # world2.show_robots(robotList)
+    # for i in range(10000):
+    #     print(i)
+    #     r1.move(world)
+    #     r1.sense(world)
+    #     r2.move(world)
+    #     r2.sense(world)
+    #     r3.move(world)
+    #     r3.sense(world)
+    #     world2.drawSenses(robotList)
+    #     world2.show_robots(robotList)
+    #     turtle.delay(50)
+    # turtle.mainloop()
+
+    # r0=Robot(world,0,1,1)
+    # r1=Robot(world,1,2,2)
+    # r2=Robot(world,2,25,25)
+    # for robot in world.getRobotList():
+    #     robot.updateKnownRobots(world.getRobotList())
+    #
+    # print(r0.chooseDest())
+
