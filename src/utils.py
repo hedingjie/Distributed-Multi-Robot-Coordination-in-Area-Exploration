@@ -9,16 +9,13 @@ import Robot
 
 ALPHA=0.5
 
-def add_noise(level, *coords):
-    return [x+random.uniform(-level,level) for x in coords]
-
-def add_some_noise(*coords):
-    return add_noise(0.1,coords)
 
 def length(x1,y1,x2,y2):
+    '''return the distance between (x1,y1) and (x2,y2)'''
     return math.sqrt((x1-x2)**2+(y1-y2)**2)
 
 def mergeMap(robotList):
+    '''merge the maps in of the robots in the robotList'''
     height,width=robotList[0].getLocalMap().shape
     mergedMap=np.full((height,width),-1)
     for robot in robotList:
@@ -40,6 +37,7 @@ def shareMsg(r1, r2):
         r2.setLocalMap(map)
 
 def getSubnet(world):
+    '''get subnets in the world, it will return several subnets'''
     robotList=world.getRobotList()
     G = nx.Graph()
     for node in robotList:
@@ -50,6 +48,7 @@ def getSubnet(world):
     return (list(nx.connected_components(G)))
 
 def getLambda(world,robot,x,y):
+    '''get lambda_i'''
     id=robot.getId()
     subnet={}
     robotList = world.getRobotList()
@@ -73,6 +72,7 @@ def getLambda(world,robot,x,y):
     # print('lambda:'+str(lambda_i))
 
 def getUnkownRate(map,x,y):
+    '''get the (unknown area) / (total area in sense)'''
     height,width=map.shape
     xMax=(x+2) if x+2 < (width-2-1) else width
     xMin=(x-2) if x-2 >0 else 0
@@ -88,7 +88,7 @@ def getUnkownRate(map,x,y):
     return cnt/((xMax-xMin+1)*(yMax-yMin+1))
 
 def getFronter(map):
-    """Get the fronter grid"""
+    """Get the fronter grids"""
     height,width=map.shape
     fronterList=[]
     for y,line in enumerate(map):

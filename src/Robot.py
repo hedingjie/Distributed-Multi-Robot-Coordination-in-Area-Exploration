@@ -61,7 +61,7 @@ class Robot(object):
         self._knownRobots=robotList
 
     def sense(self):
-        # 计算大致的感知区域
+        '''get area in sense'''
         wMap=self._world.map
         rowNum,colNum=wMap.shape
         xMin=(self._x-self._rs) if (self._x-self._rs >= 0) else 0
@@ -84,7 +84,7 @@ class Robot(object):
             pass
 
     def move(self,cmd):
-        # 测试移动功能，此处为随机游走
+        '''change its position according cmd [R,L,U,D]'''
         wMap=self._world.map
         height,width=wMap.shape
         print(self,'direct:',cmd)
@@ -112,6 +112,7 @@ class Robot(object):
 
     # 更新子网的情况，必须在所有的智能体都更新了位置之后才能更新子网
     def updateKnownRobots(self):
+        '''update robots in the communicate limits after changing its position'''
         knownRobots=[]
         robotList=self._world.getRobotList()
         for robot in robotList:
@@ -121,6 +122,7 @@ class Robot(object):
         self._knownRobots=knownRobots
 
     def communicate(self):
+        '''NOT USED!!! use utils.communicate now'''
         robotList=utils.getSubnet(self._world.get)
         for robot in robotList:
             map = utils.mergeMap(self.localMap,robot.getLocalMap())
@@ -128,6 +130,7 @@ class Robot(object):
             robot.setLocalMap(map)
 
     def broadcast(self):
+        '''broadcast its map, but not used in the project!!!'''
         for robot in self._knownRobots:
             if operator.eq(self.localMap,robot.getKnownRobots):
                 # 如果二者的地图信息相同，则不用更新
@@ -139,27 +142,7 @@ class Robot(object):
                 robot.setLocalMap(map)
 
     def chooseDest(self):
-        # 选择下一个目标点
-        # robotList=self._world.getRobotList()
-        # subnets=utils.getSubnet(robotList)
-        # for subnet in subnets:
-        #     if self._id in subnet:
-        #         self._subnet=subnet
-        # print(self._subnet)
-        #
-        # # 计算lambda
-        # lambda_i=0
-        # weight=1
-        # x1,y1=self.xy()
-        # for r_id in subnet:
-        #     if self._id != r_id:
-        #         robot=robotList[r_id]
-        #         x2,y2=robot.xy()
-        #         d=utils.length(x1,y1,x2,y2)
-        #         lambda_i=lambda_i+weight*math.pow(math.e,int(-d/self.getRC()))
-        #         weight=weight*ALPHA
-        # self.lambda_i=lambda_i
-        # print(self.lambda_i)
+        '''choose a destination for the next step'''
         x,y=self.xy()
         x_i,y_i=x,y
         gi=-9999999999999999999

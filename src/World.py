@@ -130,43 +130,12 @@ class World(object):
 
 
 
-
-        # for x,y in self.blocks:
-        #     turtle.up()
-        #     turtle.color('black')
-        #     turtle.setposition(x, y)
-        #     turtle.down()
-        #     turtle.setheading(90)
-        #     for _ in range(4):
-        #         turtle.forward(1)
-        #         turtle.right(90)
-        #     turtle.up()
-
-        # for y, line in enumerate(self.world):
-        #     for x, block in enumerate(line):
-        #         ny=self.height-y-1
-        #         turtle.up()
-        #         turtle.setposition(x,ny)
-        #         turtle.color('black')
-        #         turtle.down()
-        #         for _ in range(4):
-        #             turtle.fd(1)
-        #             turtle.right(90)
-
-
-
-
     def show_robots(self,robotList):
         for robot in robotList:
             (x,y) = robot.xy()
             y=self.height-y-1;
             # 画感知范围
-            # turtle.up()
-            # turtle.color('blue')
-            # turtle.setposition(x-0.5+robot.getRS(),y-0.5)
-            # turtle.down()
-            # turtle.circle(robot.getRS())
-            # 在这里为了方便，我们将感知范围设置为robot所在的block
+            # 将感知范围设定为以智能体所在栅格为中心的3x3的方格
             turtle.up()
             turtle.color('blue')
             turtle.setposition(x,y)
@@ -175,12 +144,6 @@ class World(object):
                 turtle.fd(1)
                 turtle.right(90)
             turtle.end_fill()
-            # 画通信范围
-            # turtle.up()
-            # turtle.color('yellow')
-            # turtle.setposition(x + 0.5 + robot.getRC(), y + 0.5)
-            # turtle.down()
-            # turtle.circle(robot.getRC())
 
             # 标注智能体
             turtle.up()
@@ -379,17 +342,11 @@ if __name__ == '__main__':
         dest2=r1.chooseDest()
         cmds2=AStar.navigate(worldData,x2,y2,dest2[0],dest2[1])
 
-            # utils.drawSense(r0.getLocalMap(), r0)
-            # utils.drawRobots(r0.getLocalMap(), world.getRobotList())
         for cmd in cmds2:
             r1.move(cmd)
             r1.sense()
             r1.updateKnownRobots()
             utils.communicate(world)
-            # utils.drawRobots(r1.getLocalMap(), world.getRobotList())
-            utils.drawSense(r1.getLocalMap(),r1)
-            # utils.drawSense(r1.getLocalMap(), r1)
-            # utils.drawRobots(r1.getLocalMap(), world.getRobotList())
 
         x3, y3 = r2.xy()
         dest3 = r2.chooseDest()
@@ -408,53 +365,14 @@ if __name__ == '__main__':
             r3.sense()
             r3.updateKnownRobots()
             utils.communicate(world)
+            utils.drawSense(r1.getLocalMap(), r1)
 
-        if(utils.Unexploration(r1.getLocalMap())==0):
+        if(utils.Unexploration(r3.getLocalMap())==0):
             print('Iteration : ',i)
             break
 
-        # utils.drawMap(r0.getLocalMap())
-
-
-
-        # local_world.drawSenses(world.getRobotList())
-        # local_world.show_robots(world.getRobotList())
 
     print('Done')
 
-    # r1=Robot(1,1)
-    # r2=Robot(1,5)
-    # r3=Robot(25,25)
-    # robotList=[]
-    # robotList.append(r1)
-    # robotList.append(r2)
-    # robotList.append(r3)
-    # # world.show_robots(robotList)
-    # world2 = World(r1.getLocalMap())
-    # world2.draw()
-    # r1.sense(world)
-    # r2.sense(world)
-    # r3.sense(world)
-    # world2.drawSenses(robotList)
-    # world2.show_robots(robotList)
-    # for i in range(10000):
-    #     print(i)
-    #     r1.move(world)
-    #     r1.sense(world)
-    #     r2.move(world)
-    #     r2.sense(world)
-    #     r3.move(world)
-    #     r3.sense(world)
-    #     world2.drawSenses(robotList)
-    #     world2.show_robots(robotList)
-    #     turtle.delay(50)
-    # turtle.mainloop()
 
-    # r0=Robot(world,0,1,1)
-    # r1=Robot(world,1,2,2)
-    # r2=Robot(world,2,25,25)
-    # for robot in world.getRobotList():
-    #     robot.updateKnownRobots(world.getRobotList())
-    #
-    # print(r0.chooseDest())
 

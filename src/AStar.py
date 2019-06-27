@@ -323,30 +323,5 @@ if __name__ == '__main__':
         (0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     ))
-
-    # readfile(map)
-    # start_x = int(1)
-    # start_y = int(1)
-    # end_x = int(2)
-    # end_y = int(2)
-    # start = Node(None, start_x, start_y)
-    # end = Node(None, end_x, end_y)
-    #
-    # preset_map()
-    #
-    # # 判断起点终点是否符合要求
-    # if (start.x, start.y) in close_list or (end.x, end.y) in close_list:
-    #     raise Exception('输入的坐标不可走')
-    #
-    # if find_the_path(start, end):
-    #     mark_path(end)
-    #
-    # # 列表方向调整为起点开始
-    # orientation.reverse()
-    # str_ori = ''
-    # for o in orientation:
-    #     str_ori = str_ori + o + ' '
-    # print(str_ori)
-
     navigate(map,1,1,0,0)
     navigate(map,0,0,25,25)
