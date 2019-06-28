@@ -1,21 +1,19 @@
-import math
-import random
-import operator
 import numpy as np
-import Navigation
 
+import AStar
 import utils
 
-WORLD_WIDTH=50
-WORLD_HEIGHT=50
-
+# 参数
 ALPHA=0.5
 W1=1
 W2=1
 W3=1.5
 
+# 感知范围
 RS=1
-RC=3
+# 通信范围
+RC=15
+
 
 class Robot(object):
 
@@ -25,13 +23,15 @@ class Robot(object):
         self._y=y
         self._rs=rs
         self._rc=rc
-        self.localMap=np.full((WORLD_HEIGHT,WORLD_WIDTH),-1)
+        self._world = world
+        self.height,self.width=world.map.shape
+        self.localMap=np.full((self.height,self.width),-1)
         # 目前子网下的智能体
         self._knownRobots=[]
         self._subnet=[]
-        self._world=world
         self._world.addRobot(self)
         self.lambda_i=0
+        self.cmds=[]
 
     def getId(self):
         return self._id
@@ -61,7 +61,7 @@ class Robot(object):
         self._knownRobots=robotList
 
     def sense(self):
-        '''get area in sense'''
+        """get area in sense"""
         wMap=self._world.map
         rowNum,colNum=wMap.shape
         xMin=(self._x-self._rs) if (self._x-self._rs >= 0) else 0
@@ -72,45 +72,44 @@ class Robot(object):
 
 
         # -1表示未探索，0表示以探索为free,1表示已探索被占用
+        x,y = self.xy()
         try:
             for i in range(xMin,xMax+1,1):
                 for j in range(yMin,yMax+1,1):
                     self.localMap[j][i]=wMap[j][i]
-                    # if utils.length(self._x,self._y,i,j) <= self._rs :
-                    #     self.localMap[j][i]=world[j][i]
-                    # else:
-                    #     pass
+                    self._world.mask[j][i]=1
         except Exception:
             pass
+        utils.drawSense(self.getLocalMap(),self)
+        utils.drawRobot(self.getLocalMap(),self)
 
     def move(self,cmd):
-        '''change its position according cmd [R,L,U,D]'''
+        """change its position according cmd [R,L,U,D]"""
         wMap=self._world.map
         height,width=wMap.shape
         print(self,'direct:',cmd)
         x,y = self.xy()
-        # 右
+        # right
         if cmd == 'R':
             if(x < width-1 and wMap[y][x+1] != 1):
                 self._x=self._x+1
                 # self._y=self._y+1
-        # 左
+        # left
         elif cmd == 'L':
             if (x>0 and wMap[y][x-1]!=1):
                 self._x=self._x-1
                 # self._y=self._y-1
-        # 上
+        # up
         elif cmd == 'D':
             if (y<height-1 and wMap[y+1][x]!=1):
                 # self._x=self._x-1
                 self._y=self._y+1
-        # 下
+        # down
         else:
             if (y > 0 and wMap[y-1][x]!=1):
                 # self._x=self._x+1
                 self._y=self._y-1
 
-    # 更新子网的情况，必须在所有的智能体都更新了位置之后才能更新子网
     def updateKnownRobots(self):
         '''update robots in the communicate limits after changing its position'''
         knownRobots=[]
@@ -121,53 +120,40 @@ class Robot(object):
                 knownRobots.append(robot)
         self._knownRobots=knownRobots
 
-    def communicate(self):
-        '''NOT USED!!! use utils.communicate now'''
-        robotList=utils.getSubnet(self._world.get)
-        for robot in robotList:
-            map = utils.mergeMap(self.localMap,robot.getLocalMap())
-            self.localMap=map
-            robot.setLocalMap(map)
-
-    def broadcast(self):
-        '''broadcast its map, but not used in the project!!!'''
-        for robot in self._knownRobots:
-            if operator.eq(self.localMap,robot.getKnownRobots):
-                # 如果二者的地图信息相同，则不用更新
-                return
-            else:
-                # 二者地图信息不同，融合二者的地图信息并进行更细
-                map = utils.mergeMap(self.localMap,robot.getLocalMap)
-                self.localMap=map
-                robot.setLocalMap(map)
 
     def chooseDest(self):
         '''choose a destination for the next step'''
         x,y=self.xy()
         x_i,y_i=x,y
-        gi=-9999999999999999999
+        gi=-9999999999999999
         fronterList=utils.getFronter(self.localMap)
-        print('__________________________________')
+        # print('__________________________________')
         for fronter in fronterList:
             value=utils.getLambda(self._world,self,fronter[0],fronter[1])
             lmda_i=value if value!=None else 0
             d_i=abs(fronter[0]-x)+abs(fronter[1]-y)
             g=W1*fronter[2]-W2*d_i+W3*lmda_i
-            print('g:%f',g)
+            # print('g:%f',g)
             if g>gi:
                 gi=g
                 x_i=fronter[0]
                 y_i=fronter[1]
 
-        print('__________________________________')
-        if len(fronterList)==0:
-            print('Hello')
-
-        print('Robot at (%d,%d) Choose Dest:(%d,%d,%d)'%(x,y,x_i,y_i,gi))
+        print('Robot%d at (%d,%d) Choose Dest:(%d,%d,%d)'%(self._id,x,y,x_i,y_i,gi))
+        # print('__________________________________')
         return (x_i,y_i,gi)
 
-    def exploration(self):
-        pass
+    def explorationByOneStep(self):
+        """exploration map by one step"""
+        start_x,start_y=self.xy()
+        end=self.chooseDest()
+        if len(self.cmds)==0:
+            # if the cmd is empty, navigate again
+            self.cmds=AStar.navigate(self._world.map,start_x,start_y,end[0],end[1])
+        cmd = self.cmds.pop(0)
+        self.move(cmd)
+        self.sense()
+        self.updateKnownRobots()
 
     def __str__(self):
         return "Robot"+str(self._id)+" at ("+str(self._x)+','+str(self._y)+")"

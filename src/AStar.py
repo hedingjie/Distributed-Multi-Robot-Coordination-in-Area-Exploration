@@ -1,6 +1,4 @@
-import sys
 import numpy as np
-import turtle
 
 # 地图(从文件中获取的二维数组)
 maze = []
@@ -178,6 +176,7 @@ def preset_map():
 
 def navigate(map, start_x, start_y, end_x, end_y):
     global maze,open_list,close_list,start,end,orientation
+    orientation = []
     readfile(map)
     start = Node(None, start_x, start_y)
     end = Node(None, end_x, end_y)
@@ -210,8 +209,7 @@ def navigate(map, start_x, start_y, end_x, end_y):
     # 关闭列表  (已经探查过的地点和不可行走的地点)
     close_list = {}
     # 地图边界(二维数组的大小，用于判断一个节点的相邻节点是否超出范围)
-    orientation=[]
-    return str_ori
+    return orientation
 
 
 
@@ -220,7 +218,7 @@ def navigate(map, start_x, start_y, end_x, end_y):
 
 
 if __name__ == '__main__':
-    # 判断在控制台输入的参数时候达到要求
+    # 测试函数
     map=np.array((
         (0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
