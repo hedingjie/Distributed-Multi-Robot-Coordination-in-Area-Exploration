@@ -2,6 +2,7 @@ import numpy as np
 
 import AStar
 import utils
+import Config
 
 # 参数
 ALPHA=0.5
@@ -80,8 +81,9 @@ class Robot(object):
                     self._world.mask[j][i]=1
         except Exception:
             pass
-        utils.drawSense(self.getLocalMap(),self)
-        utils.drawRobot(self.getLocalMap(),self)
+        if Config.DRAW:
+            utils.drawSense(self.getLocalMap(),self)
+            utils.drawRobot(self.getLocalMap(),self)
 
     def move(self,cmd):
         """change its position according cmd [R,L,U,D]"""

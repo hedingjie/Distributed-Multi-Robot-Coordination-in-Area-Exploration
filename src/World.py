@@ -1,7 +1,10 @@
 from __future__ import  absolute_import
 
+import math
+import random
 import turtle
 from Robot import *
+import Config
 
 
 turtle.tracer(50000, delay=0)
@@ -12,6 +15,7 @@ turtle.title("DMCAE")
 
 UPDATE_EVERY = 0
 DRAW_EVERY = 2
+
 
 
 class World(object):
@@ -155,19 +159,24 @@ if __name__ == '__main__':
 
     world = World(worldData)
 
-    # 在此处创建智能体对象
-    r0=Robot(world,0,1,1)
-    r1=Robot(world,1,25,25)
-    r2=Robot(world,2,16,16)
-    r3=Robot(world,3,1,25)
+    for i in range(Config.ROBOT_NUM):
+        while(True):
+            x=int(random.random()*50)
+            y=int(random.random()*50)
+            if (world.map[y][x]!=1):
+                _=Robot(world,i,x,y)
+                break
 
-    utils.drawWorld(world)
-    utils.drawMap(r1.getLocalMap())
+    if Config.DRAW:
+        utils.drawWorld(world)
+        utils.drawMap(world.getRobotList()[0].getLocalMap())
 
     for robot in world.getRobotList():
         robot.sense()
 
-    for i in range(500):
+    i=0
+    while(True):
+        i=i+1
         for robot in world.getRobotList():
             robot.explorationByOneStep()
         utils.communicate(world)
