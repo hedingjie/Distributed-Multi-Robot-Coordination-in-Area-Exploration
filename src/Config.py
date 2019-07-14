@@ -18,5 +18,5 @@ RC=15
 # False : Do not draw the graphics
 # True : Draw the graphics
 
-DRAW = False
+DRAW = True
 
